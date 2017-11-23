@@ -7,7 +7,8 @@ namespace WorldDbQuerier
     class Program
     {
         //private static MySqlConnection con = new MySqlConnection();
-        private static string connectieString = "Server=192.168.56.121; Port=3306; Database=world; Uid=imma; Pwd=r00t;"; //zet de database world eerst als "Default Schema" (RM)
+        //private static string connectieString = "Server=192.168.56.121; Port=3306; Database=world; Uid=imma; Pwd=r00t;"; //zet de database world eerst als "Default Schema" (RM)
+        private static string connectieString = "Server=localhost; Port=3306; Database=world; Uid=root; Pwd=r00t;"; //huis
         //using om connectie te openen?
         
 
@@ -48,7 +49,6 @@ namespace WorldDbQuerier
             {
                 Console.WriteLine(lezer["Name"]); //niet lezer["world.Country.Name"]
             }
-
         }
 
         private static void ZoekOpNaamEnPrint()
@@ -61,11 +61,13 @@ namespace WorldDbQuerier
 
             MySqlCommand cmd = new MySqlCommand();
             cmd.Connection = con;
-            cmd.CommandText = "SELECT * FROM World.Country"; //Aanpassen? Ja: "select " + ... + " from World.Country";
+            cmd.CommandText = "SELECT * FROM World.Country LIKE @land"; //Aanpassen? Ja: "select " + ... + " from World.Country";
 
-            
+            cmd.Parameters.AddWithValue("@land", "%" + land + "%"); //Correct?
+
+            lezer = cmd.ExecuteReader(); //Error?
             con.Open();
-            lezer = cmd.ExecuteReader(); //error
+            
 
             while (lezer.Read())
             {
@@ -97,20 +99,28 @@ namespace WorldDbQuerier
                     foreach (char teken in land)
                     {
                         i++;
-                    }
-
-                    foreach (char teken in land)
-                    {
                         j++;
                     }
 
+                    
+
                     char[] landTekens = new char[i];
                     char[] landnaamTekens = new char[j];
+                    //waarden toekennen aan landTekens en landnaamTekens
 
                     for (int k = 0; k <= i; k++)
                     {
-                        int l = k;
-                        if (landTekens[k] == landnaamTekens[l])
+                        foreach (char teken in land)
+                        {
+                            landTekens[k] = teken;
+                        }
+
+                        foreach (char teken in lezer["naam"].ToString())
+                        {
+                            landnaamTekens[k] = teken;
+                        }
+
+                        if (landTekens[k] == landnaamTekens[k])
                         {
                             overeengekomenTekens = true;
                         }
